@@ -8,7 +8,7 @@ resource "aws_s3_bucket_versioning" "document_processor_bucket_versioning" {
   versioning_configuration {
     status = "Enabled"
   }
-  
+
 }
 resource "aws_s3_bucket_server_side_encryption_configuration" "document_processor_bucket_encryption" {
   bucket = aws_s3_bucket.document_processor_bucket.id
@@ -19,25 +19,25 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "document_processo
   }
 }
 resource "aws_s3_bucket_lifecycle_configuration" "document_processor_bucket_lifecycle" {
-    bucket = aws_s3_bucket.document_processor_bucket.id
-    
-    rule {
-        id     = "Move old files to infrequent access and expire them"
-        status = "Enabled"
-        transition {
-            days          = 90
-            storage_class = "STANDARD_IA"
-            }
-    
-        expiration {
-        days = 365
-        }
-        ## If required to limit the rule to the IAM S3 prefix
-        # filter {
-        # prefix = local.s3_bucket_prefix + "/"
-        # }
+  bucket = aws_s3_bucket.document_processor_bucket.id
+
+  rule {
+    id     = "Move old files to infrequent access and expire them"
+    status = "Enabled"
+    transition {
+      days          = 90
+      storage_class = "STANDARD_IA"
     }
-  
+
+    expiration {
+      days = 365
+    }
+    ## If required to limit the rule to the IAM S3 prefix
+    # filter {
+    # prefix = local.s3_bucket_prefix + "/"
+    # }
+  }
+
 }
 resource "aws_s3_bucket_public_access_block" "document_processor_bucket_lifecycle_public_access_block" {
   bucket = aws_s3_bucket.document_processor_bucket.id
