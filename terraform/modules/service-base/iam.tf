@@ -1,4 +1,4 @@
-resource "aws_iam_role" "service_role" {
+resource "aws_iam_role" "document_processor_role" {
     name               = "${var.service_name}-${var.environment}-role"
     assume_role_policy = jsondecode({
         Version = "2012-10-17",
