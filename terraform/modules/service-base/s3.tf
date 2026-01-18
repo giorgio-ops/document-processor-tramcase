@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "document_processor_bucket" {
-  bucket = "documentprocessor"
+  bucket = "${var.service_name}-${var.environment}-bucket"
 
   tags = var.tags
 }
