@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "document-processor.fullname" . }}
+  labels:
+    {{- include "document-processor.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "document-processor.selectorLabels" . | nindent 6 }}
+
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+      
+  endpoints:
+    - port: http
+      interval: 30s
+      scrapeTimeout: 10s
