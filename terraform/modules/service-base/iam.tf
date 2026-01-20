@@ -84,5 +84,5 @@ data "aws_iam_openid_connect_provider" "oidc_provider_url" {
 
 locals {
   s3_bucket_prefix = "raw-files"
-  oidc_issuer = replace(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")
+  oidc_issuer = var.eks_oidc_issuer
 }
