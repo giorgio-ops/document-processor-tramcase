@@ -20,18 +20,9 @@ resources:
     memory: 512Mi
 
 # Liveness and readiness probes
-livenessProbe:
-  httpGet:
-    path: /
-    port: http
 
-readinessProbe:
-  httpGet:
-    path: /
-    port: http
 
 # Environment variables from ConfigMap and Secrets
-
 envFrom:
   - configMapRef:
       name: document-processor-config
@@ -39,14 +30,13 @@ envFrom:
       name: document-processor-secret
 
 # Service account with IRSA annotation
-
 serviceAccount:
-
   create: true
   annotations: 
     eks.amazonaws.com/role-arn: arn:aws:iam::123456789:role/document-processor-dev-role>
 
 
+# Security context (non-root, read-only filesystem)
 securityContext: 
   capabilities:
     drop:
