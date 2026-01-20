@@ -16,6 +16,12 @@ serviceAccount:
   annotations: 
     eks.amazonaws.com/role-arn: arn:aws:iam::123456789:role/document-processor-dev-role>
 
+# Configuration values for the application
+config:
+  s3Bucket: document-processor-dev-bucket
+  sqsQueueUrl: https://sqs.us-east-1.amazonaws.com/123456789/document-processor-dev-queue
+  logLevel: INFO
+  awsRegion: us-east-1
 
 # Resource requests/limits defined
 resources:
