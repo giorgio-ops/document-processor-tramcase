@@ -6,13 +6,13 @@ resource "aws_iam_role" "document_processor_role" {
       {
         Effect = "Allow",
         Principal = {
-          Federated = "arn:aws:iam::${var.account_id}:oidc-provider/oidc.eks.${var.region}.amazonaws.com/id/EXAMPLE"
+          Federated = "${data.aws_iam_openid_connect_provider.oidc_provider_url.arn}"
         },
         Action = "sts:AssumeRoleWithWebIdentity",
         Condition = {
           StringEquals = {
-            "oidc.eks.${var.region}.amazonaws.com/id/EXAMPLE:sub" = "system:serviceaccount:${var.namespace}:${var.service_name}",
-            "oidc.eks.${var.region}.amazonaws.com/id/EXAMPLE:aud" = "sts.amazonaws.com"
+            "${local.oidc_issuer}:sub" = "system:serviceaccount:${var.namespace}:${var.service_name}",
+            "${local.oidc_issuer}:aud" = "sts.amazonaws.com"
           }
         }
       }
@@ -24,7 +24,7 @@ resource "aws_iam_role" "document_processor_role" {
 
 resource "aws_iam_role_policy" "service_role_policy" {
   name = "${var.service_name}-${var.environment}-policy"
-  role = aws_iam_role.service_role.id
+  role = aws_iam_role.document_processor_role.id
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -74,6 +74,15 @@ resource "aws_iam_role_policy" "service_role_policy" {
 
 }
 
+data "aws_eks_cluster" "cluster" {
+  name = "staging-cluster"
+}
+
+data "aws_iam_openid_connect_provider" "oidc_provider_url" {
+  url = data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer
+}
+
 locals {
   s3_bucket_prefix = "raw-files"
+  oidc_issuer = replace(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")
 }

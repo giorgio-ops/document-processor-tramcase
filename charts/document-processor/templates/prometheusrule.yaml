@@ -2,21 +2,23 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: {{ include "document-processor.fullname" . }}
+  name: {{ include "document-processor.fullname" . }}-alerts
   labels:
     {{- include "document-processor.labels" . | nindent 4 }}
 spec:
   groups:
-    - name: {{ include "document-processor.fullname" . }}.rules
+    - name: {{ include "document-processor.fullname" . }}
       rules:
         - alert: DocumentProcessorHighErrorRate
-          expr: rate(document_processor_errors_total[5m]) > {{ .Values.monitoring.alerts.errorRateThreshold }}
+          expr: |
+            sum(rate(http_requests_total{service="document-processor",status=~"5.."}[5m]))
+            / sum(rate(http_requests_total{service="document-processor"}[5m])) > {{ .Values.monitoring.alerts.errorRateThreshold }}
           for: 5m
           labels:
             severity: critical
           annotations:
             summary: "High error rate detected in Document Processor"
-            description: "The error rate has exceeded {{ .Values.monitoring.alerts.errorRateThreshold }} errors per second for more than 10 minutes."
+            description: Error rate is {{ $value | humanizePercentage }}
 
         - alert: DocumentProcessorHighQueueDepth
           expr: document_processor_queue_depth > {{ .Values.monitoring.alerts.queueDepthThreshold }}
