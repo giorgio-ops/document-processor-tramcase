@@ -1,0 +1,36 @@
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "document-processor.fullname" . }}
+  labels:
+    {{- include "document-processor.labels" . | nindent 4 }}
+spec:
+  groups:
+    - name: {{ include "document-processor.fullname" . }}.rules
+      rules:
+        - alert: DocumentProcessorHighErrorRate
+          expr: rate(document_processor_errors_total[5m]) > {{ .Values.monitoring.alerts.errorRateThreshold }}
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "High error rate detected in Document Processor"
+            description: "The error rate has exceeded {{ .Values.monitoring.alerts.errorRateThreshold }} errors per second for more than 10 minutes."
+
+        - alert: DocumentProcessorHighQueueDepth
+          expr: document_processor_queue_depth > {{ .Values.monitoring.alerts.queueDepthThreshold }}
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High queue depth detected in Document Processor"
+            description: "The queue depth has exceeded {{ .Values.monitoring.alerts.queueDepthThreshold }} for more than 10 minutes."
+        - alert: PodRestarted
+          expr: increase(kube_pod_container_status_restarts_total[15m]) > 3
+          for: 15m
+          labels:
+            severity: warning
+                    annotations:
+            summary: "Pod restarts too high"
+            description: "Pod restarted more than 3 times in 15 minutes."

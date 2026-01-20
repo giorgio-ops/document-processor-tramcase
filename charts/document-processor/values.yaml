@@ -26,6 +26,13 @@ autoscaling:
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
 
+# Prometheus Rule configuration for prometheusrule.yaml
+monitoring:
+  enabled: true
+  alerts:
+    errorRateThreshold: 5
+    queueDepthThreshold: 1000
+
 # Resource requests/limits defined
 resources:
   limits:
