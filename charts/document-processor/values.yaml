@@ -10,14 +10,16 @@ image:
 serviceAccount:
   create: true
   annotations: 
-    eks.amazonaws.com/role-arn: arn:aws:iam::123456789:role/document-processor-dev-role>
+    eks.amazonaws.com/role-arn: ""
 
-# Configuration values for configmap.yaml
-config:
-  s3Bucket: document-processor-dev-bucket
-  sqsQueueUrl: https://sqs.us-east-1.amazonaws.com/123456789/document-processor-dev-queue
-  logLevel: INFO
-  awsRegion: us-east-1
+# Resource requests and limits for deployment.yaml
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
 
 # Autoscaling configuration for hpa.yaml
 autoscaling:
@@ -25,6 +27,13 @@ autoscaling:
   minReplicas: 2
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
+    
+# Configuration values for configmap.yaml
+config:
+  s3Bucket: ""
+  sqsQueueUrl: ""
+  logLevel: INFO
+  awsRegion: us-east-1
 
 # Prometheus Rule configuration for prometheusrule.yaml
 monitoring:
@@ -32,40 +41,3 @@ monitoring:
   alerts:
     errorRateThreshold: 5
     queueDepthThreshold: 1000
-
-# Resource requests/limits defined
-resources:
-  limits:
-    cpu: 250m
-    memory: 256Mi
-  requests:
-    cpu: 500m
-    memory: 512Mi
-
-# Liveness and readiness probes
-
-
-# Environment variables from ConfigMap and Secrets
-envFrom:
-  - configMapRef:
-      name: document-processor-config
-  - secretRef:
-      name: document-processor-secret
-
-
-
-# Security context (non-root, read-only filesystem)
-securityContext: 
-  capabilities:
-    drop:
-    - ALL
-  readOnlyRootFilesystem: true
-  runAsNonRoot: true
-  runAsUser: 1000
-
-# This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-imagePullSecrets: []
-# This is to override the chart name.
-nameOverride: ""
-fullnameOverride: ""
-

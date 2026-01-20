@@ -18,21 +18,20 @@ spec:
       serviceAccountName: {{ include "document-processor.serviceAccountName" . }}
 
       securityContext: 
-        capabilities:
-          drop:
-          - ALL
-        readOnlyRootFilesystem: true
         runAsNonRoot: true
         runAsUser: 1000
 
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ include "document-processor.fullname" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
+            - name: metrics
+              containerPort:
               protocol: TCP
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
 
           securityContext:
             readOnlyRootFilesystem: true
@@ -40,12 +39,11 @@ spec:
             capabilities:
               drop:
               - ALL
-
           envFrom:
             - configMapRef:
-                name: {{ .Values.envFrom.configMapRef.name }}
+                name: {{ include "document-processor.fullname" . }}-config
             - secretRef:
-                name: {{ .Values.envFrom.secretRef.name }}
+                name: {{ include "document-processor.fullname" . }}-secret
 
           livenessProbe:
             httpGet:

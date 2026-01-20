@@ -1,5 +1,5 @@
 apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
+kind: PodMonitor
 metadata:
   name: {{ include "document-processor.fullname" . }}
   labels:
@@ -12,7 +12,7 @@ spec:
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}
-      
+
   endpoints:
     - port: http
       interval: 30s
