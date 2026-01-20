@@ -1,27 +1,30 @@
 
-### deployment.yaml values
-
-# Replica count with minimum of 2 for high availability
+# Configuration values for deployment.yaml
 replicaCount: 2
-
-# Container for the deployment
 image:
   repository: 123456789.dkr.ecr.us-east-1.amazonaws.com/document-processor
   tag: "latest"
   pullPolicy: IfNotPresent
 
-# Service account with IRSA annotation
+# Service account with IRSA annotation for serviceaccount.yaml
 serviceAccount:
   create: true
   annotations: 
     eks.amazonaws.com/role-arn: arn:aws:iam::123456789:role/document-processor-dev-role>
 
-# Configuration values for the application
+# Configuration values for configmap.yaml
 config:
   s3Bucket: document-processor-dev-bucket
   sqsQueueUrl: https://sqs.us-east-1.amazonaws.com/123456789/document-processor-dev-queue
   logLevel: INFO
   awsRegion: us-east-1
+
+# Autoscaling configuration for hpa.yaml
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
 
 # Resource requests/limits defined
 resources:
@@ -140,11 +143,7 @@ httpRoute:
 
 
 # This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
+
   # targetMemoryUtilizationPercentage: 80
 
 # Additional volumes on the output Deployment definition.
