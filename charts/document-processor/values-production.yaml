@@ -1,0 +1,9 @@
+# Service account with IRSA annotation for serviceaccount.yaml
+serviceAccount:
+  annotations: 
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789:role/document-processor-production-role
+    
+# Configuration values for configmap.yaml
+config:
+  s3Bucket: document-processor-production-bucket
+  sqsQueueUrl: https://sqs.us-east-1.amazonaws.com/123456789/document-processor-production-queue
