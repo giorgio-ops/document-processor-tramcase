@@ -10,6 +10,13 @@ image:
   tag: "latest"
   pullPolicy: IfNotPresent
 
+# Service account with IRSA annotation
+serviceAccount:
+  create: true
+  annotations: 
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789:role/document-processor-dev-role>
+
+
 # Resource requests/limits defined
 resources:
   limits:
@@ -29,11 +36,6 @@ envFrom:
   - secretRef:
       name: document-processor-secret
 
-# Service account with IRSA annotation
-serviceAccount:
-  create: true
-  annotations: 
-    eks.amazonaws.com/role-arn: arn:aws:iam::123456789:role/document-processor-dev-role>
 
 
 # Security context (non-root, read-only filesystem)
