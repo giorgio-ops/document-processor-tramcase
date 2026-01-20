@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+meetadata:
+  name: document-processor
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/giorgio-ops/document-processor-tramcase.git'
+    targetRevision: HEAD
+  path: charts/document-processor
+  helm:
+    valueFiles:
+      - values.yaml
+      - value-staging.yaml
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: document-processor-staging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
