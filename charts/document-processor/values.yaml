@@ -1,25 +1,25 @@
-# Default values for document-processor.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
 
-# This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
+### deployment.yaml values
+
+# Replica count with minimum of 2 for high availability
 replicaCount: 2
 
-# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
+# Container for the deployment
 image:
   repository: 123456789.dkr.ecr.us-east-1.amazonaws.com/document-processor
   tag: "latest"
   pullPolicy: IfNotPresent
 
+# Resource requests/limits defined
 resources:
   limits:
-    cpu: 100m
-    memory: 128Mi
+    cpu: 250m
+    memory: 256Mi
   requests:
-    cpu: 100m
-    memory: 128Mi
+    cpu: 500m
+    memory: 512Mi
 
-# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+# Liveness and readiness probes
 livenessProbe:
   httpGet:
     path: /
@@ -29,6 +29,23 @@ readinessProbe:
   httpGet:
     path: /
     port: http
+
+# Environment variables from ConfigMap and Secrets
+
+envFrom:
+  - configMapRef:
+      name: document-processor-config
+  - secretRef:
+      name: document-processor-secret
+
+# Service account with IRSA annotation
+
+serviceAccount:
+
+  create: true
+  annotations: 
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789:role/document-processor-dev-role>
+
 
 securityContext: 
   capabilities:
@@ -44,17 +61,7 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
-serviceAccount:
-  # Specifies whether a service account should be created.
-  create: true
-  # Automatically mount a ServiceAccount's API credentials?
-  automount: true
-  # Annotations to add to the service account.
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template.
-  name: ""
+
 
 # This is for setting Kubernetes Annotations to a Pod.
 # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
