@@ -11,14 +11,23 @@ spec:
       rules:
         - alert: DocumentProcessorHighErrorRate
           expr: |
-            sum(rate(http_requests_total{service="document-processor",status=~"5.."}[5m]))
-            / sum(rate(http_requests_total{service="document-processor"}[5m])) > {{ .Values.monitoring.alerts.errorRateThreshold }}
+            sum(rate(http_requests_total{
+              namespace="{{ .Release.Namespace }}",
+              app="{{ include "document-processor.name" . }}",
+              status=~"5.."
+            }[5m]))
+            /
+            sum(rate(http_requests_total{
+              namespace="{{ .Release.Namespace }}",
+              app="{{ include "document-processor.name" . }}"
+            }[5m]))
+            > {{ .Values.monitoring.alerts.errorRateThreshold }}
           for: 5m
           labels:
             severity: critical
           annotations:
             summary: "High error rate detected in Document Processor"
-            description: Error rate is {{ $value | humanizePercentage }}
+            description: "Error rate is {{ `{{ $value | humanizePercentage }}` }}"
 
         - alert: DocumentProcessorHighQueueDepth
           expr: document_processor_queue_depth > {{ .Values.monitoring.alerts.queueDepthThreshold }}
@@ -33,6 +42,7 @@ spec:
           for: 15m
           labels:
             severity: warning
-                    annotations:
+          annotations:
             summary: "Pod restarts too high"
             description: "Pod restarted more than 3 times in 15 minutes."
+{{- end }}
