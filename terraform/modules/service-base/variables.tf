@@ -39,10 +39,6 @@ variable "tags" {
   type = map(string)
 }
 
-variable "eks_cluster_arn" {
-  type        = string
-  description = "EKS Cluster ARN"
-}
 variable "eks_oidc_issuer" {
   type        = string
   description = "EKS OIDC Issuer URL"
