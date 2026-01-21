@@ -1,6 +1,6 @@
 
 module "service-base" {
-  source = "../../modules/service-base"
+  source = "../../../modules/service-base"
 
   service_name    = var.service_name
   environment     = var.environment
@@ -11,7 +11,7 @@ module "service-base" {
   eks_oidc_issuer = "oidc.eks.${var.region}.amazonaws.com/id/EXAMPLE"
 
   # Optional
-  s3_versioning_enabled  = var.enable_versioning
+  s3_versioning_enabled  = var.s3_versioning_enabled
   sqs_visibility_timeout = var.sqs_visibility_timeout
   log_retention_days     = var.log_retention_days
 
