@@ -4,6 +4,7 @@ resource "aws_s3_bucket" "document_processor_bucket" {
   tags = var.tags
 }
 resource "aws_s3_bucket_versioning" "document_processor_bucket_versioning" {
+  count = var.s3_versioning_enabled ? 1 : 0
   bucket = aws_s3_bucket.document_processor_bucket.id
   versioning_configuration {
     status = "Enabled"

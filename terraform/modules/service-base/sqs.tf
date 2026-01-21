@@ -1,6 +1,6 @@
 resource "aws_sqs_queue" "document_processor_queue" {
   name                       = "${var.service_name}-${var.environment}-queue"
-  visibility_timeout_seconds = 300    # 5 minutes
+  visibility_timeout_seconds = var.sqs_visibility_timeout
   message_retention_seconds  = 604800 # 7 days
   tags                       = var.tags
 }
