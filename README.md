@@ -1,106 +1,126 @@
 # document-processor-tramcase
-This repository will be used to store the IaC for a Documment Processor service
 
-# Overview
+This repository contains the Infrastructure as Code (IaC) for the **Document Processor** service.
 
-In this repo we have built the IaC for a microsservice called document processor that will: 
-hat will:
+---
 
-- Process legal documents uploaded by tenants
-- It will run in Kubernetes with autoscalling
-- All the infra is provided via IaC with Terraform
-- The Kubernetes application has been configured with Helm to support multienvironment
-- ArgosCD has been configured to support the GitOps process
-- The service has Prometheus rules to monitor properly the Kubernetes application. 
+## Overview
 
-# Prerrequisites:
+This repository contains the IaC for a microservice called **Document Processor**, which:
 
-This project requires the following tools installed:
+- Processes legal documents uploaded by tenants
+- Runs on Kubernetes with autoscaling enabled
+- Is fully provisioned using Terraform
+- Uses Helm to support multi-environment deployments
+- Uses Argo CD to enable a GitOps-based deployment process
+- Includes Prometheus rules to properly monitor the Kubernetes application
 
-|Tool | Version |
-|-------- | -------- |
-| Terraform  | v1.14.3 |
-| Helm | v4.0.5 |
-| kubectl | v1.22.5 |
+---
 
-In addition, it requires the following services configured:
- - A running kubernetes cluster with the namespace called document-processor
- - An AWS account ID
+## Prerequisites
 
- # Setup Instructions
+This project requires the following tools to be installed:
 
- The deployment of this solution hast to be done in three steps:
+| Tool      | Version |
+|-----------|---------|
+| Terraform | v1.14.3 |
+| Helm      | v4.0.5  |
+| kubectl  | v1.22.5 |
+
+Additionally, the following prerequisites must be in place:
+
+- A running Kubernetes cluster with a namespace named `document-processor`
+- An AWS account ID
+
+---
+
+## Setup Instructions
+
+The deployment of this solution must be completed in three steps.
+
+---
 
 ## A. Configure the AWS Infrastructure with Terraform
 
-1. Go to the service base folder
+1. Navigate to the service environment folder:
 ```bash
-$ cd terraform/emvironments/staging/document-processor
-```
-2. Configure the AWS credentials. It can be done via aws sso login or direcrtly exporting in the console.
-
-3. Configure the backed.tf with the adecuate name of your terraform state s3 bucket
-
-4. Run terraform init to initialize terraform for this project
-```bash
-$ terraform init
-```
-5. You can run terraform validate to check that the file is well structured
-```bash
-$ terraform validate
-```
-6. Run terraform plan in order to validate the resources that are going to be created
-```bash
-$ terraform plan
-```
-7. If the plan looks good, proceed to apply the infra 
-```bash
-$ terraform apply
-```
-Wait some minutes and the infra would be applied with all the required resources. 
-
-## B. Validate the manifests, template the application with Helm and deploy to Kubernetes
-1. Execute a lint to validate the manifests
-```bash
-$ helm lint charts/document-processor
-```
-2. Template the application to validate what is Kubernetes going to receive
-```bash
-$ helm template document-processor charts/document-processor -f charts/document-processor/values-staging.yaml
+cd terraform/environments/staging/document-processor
 ```
 
-3. If everything looks good, deploy the application to Kubernetes:
+2. Configure AWS credentials. This can be done using `aws sso login` or by exporting credentials directly in the shell.
+
+3. Configure the `backend.tf` file with the correct name of your Terraform state S3 bucket.
+
+4. Initialize Terraform:
 ```bash
-$ hhelm install document-processor ./charts/document-processor \
+terraform init
+```
+
+5. Validate the Terraform configuration:
+```bash
+terraform validate
+```
+
+6. Review the execution plan:
+```bash
+terraform plan
+```
+
+7. If everything looks correct, apply the infrastructure:
+```bash
+terraform apply
+```
+
+After a few minutes, the infrastructure will be provisioned with all required resources.
+
+---
+
+## B. Validate Manifests, Template the Application with Helm, and Deploy to Kubernetes
+
+1. Run a Helm lint to validate the chart:
+```bash
+helm lint charts/document-processor
+```
+
+2. Render the Helm templates to inspect what Kubernetes will receive:
+```bash
+helm template document-processor charts/document-processor \
+  -f charts/document-processor/values-staging.yaml
+```
+
+3. If everything looks good, deploy the application:
+```bash
+helm install document-processor ./charts/document-processor \
   -n document-processor \
   -f values.yaml \
   -f values-staging.yaml
-
 ```
 
-4. Finally you can check if the application is deployed in your cluster running the this commnad
+4. Verify that the application is running:
 ```bash
-$ kubectl get pods -n document-processor
+kubectl get pods -n document-processor
 ```
 
+---
 
-## C. Promotion process with ArgoCD
+## C. Promotion Process with Argo CD
 
-ArgoCD helps on the GitOps process to maintain a good management of environemnts while it guarantees the idempotency of what is depoyed on the enviroments. 
+Argo CD enables a GitOps workflow to manage environments while guaranteeing idempotent deployments.
 
-For this excersise, we are asuming that we use a trunk based branching strategy which consist on direct commits for maain and the deployment of them to the corresponding environments. 
+For this project, we assume a **trunk-based development strategy**, where changes are committed directly to `main` and promoted through environments.
 
-So, for that the flow is the following:
+### Promotion Flow
 
-- Every merge to main deploys to staging
-- When validated, you tag that exact commit
-- Production tracks the tag
+- Every merge to `main` deploys to **staging**
+- Once validated, the commit is tagged
+- **Production** tracks the tag
 
-In practical terms, it means that:
+### Practical Steps
 
-1. Every time that I merge to main, it will deploy what is in the document-processort.yaml
-2. Once I have done the multiple tests and I am ready to deploy to prod, I need to update my document-processor-production.yaml file with a tag or version.
-```bash
+1. Every merge to `main` deploys the configuration defined in `document-processor.yaml`.
+
+2. Once validation is complete and the service is ready for production, update `document-processor-production.yaml` with a release tag:
+```yaml
 spec:
   source:
     targetRevision: release-1.4.0
@@ -108,29 +128,34 @@ spec:
       valueFiles:
         - values.yaml
         - values-production.yaml
-
 ```
-3. Push to main
-4. Create a tag with the same version added in the prod yaml file
+
+3. Push the changes to `main`.
+
+4. Create a Git tag matching the production version:
 ```bash
 git tag release-1.4.0
 ```
-5. Push taht tag to Git
+
+5. Push the tag:
 ```bash
 git push origin release-1.4.0
 ```
-6. Argo will see the tag and it will deploy to prod. 
 
-## D. Rollback 
+6. Argo CD detects the new tag and deploys it to production.
 
-Following the same aproach and taking in account that we are following trunk based strategy, the rollback is really easy.
+---
 
-We just need to follow the next steps:
+## D. Rollback
 
-1. Review what was the previous tag released. 
-2. Create a revert branch or a new one
-3. Update the prod yaml file to use the previous release. Example 
-```bash
+Using the same trunk-based approach, rolling back is straightforward.
+
+### Rollback Steps
+
+1. Identify the previously deployed release tag.
+2. Create a revert or fix branch.
+3. Update the production manifest to point to the previous release:
+```yaml
 spec:
   source:
     targetRevision: release-1.3.9
@@ -139,25 +164,36 @@ spec:
         - values.yaml
         - values-production.yaml
 ```
-4. Commit and push.
+4. Commit and push the change.
 
-Internally, ArgoCD detects the change, re-renders Helm and reconciles cluster to the old state
+Argo CD will detect the update, re-render the Helm chart, and reconcile the cluster to the previous state.
 
-# Architecture Decisions:
-Can be found in the architecture.md file
+---
 
-# What You’d Improve:
-- Starting by Terraform, I would creates modules for every single AWS service separated in different repositories. This is a good practice because it helps to encapsulate one single type of resources, making them more maintainable and reusable with multiple projects. Currently setup is not reusable
-- Implementation of Checov to scan infrastructure and find misconfigurations before creating them
-- Implement Terragunt for the Terraform management such as environment, states, etc
-- Implement unitary tests with Terratest.
-- Configure a proper dev - stg - prod chart with Helm
-- Define the manifests for dev - stg - prod for ArgoCD
-- Implement GitHub Actions to decorarate the PR with check such as: Terraform Linters, Helm Linters, security checks, etc,
+## Architecture Decisions
 
-# Time Spent
+Architecture decisions are documented in the `architecture.md` file.
 
-- Terrafornm: 1.5 H
-- Helm: 2.5 H
-- ArgoCD: 1 H
-- Documentation: 1 H
+---
+
+## What I’d Improve
+
+- Refactor Terraform code into reusable modules, one per AWS service, ideally stored in separate repositories
+- Add **Checkov** to scan infrastructure for security and configuration issues
+- Introduce **Terragrunt** to better manage environments, remote state, and dependencies
+- Implement infrastructure unit tests using **Terratest**
+- Define separate Helm values for `dev`, `stg`, and `prod`
+- Create dedicated Argo CD manifests per environment
+- Add GitHub Actions to decorate pull requests with:
+  - Terraform linting and validation
+  - Helm linting
+  - Security and compliance checks
+
+---
+
+## Time Spent
+
+- Terraform: 1.5 h  
+- Helm: 2.5 h  
+- Argo CD: 1 h  
+- Documentation: 1 h  
