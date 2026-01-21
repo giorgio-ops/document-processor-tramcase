@@ -172,7 +172,7 @@ Argo CD will detect the update, re-render the Helm chart, and reconcile the clus
 
 ## Architecture Decisions
 
-Architecture decisions are documented in the `architecture.md` file.
+Architecture decisions are documented in the [architecture](docs/architecture.md) file.
 
 ---
 
