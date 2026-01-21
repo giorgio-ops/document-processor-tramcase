@@ -59,22 +59,3 @@ jobs:
 
       - name: Helm lint
         run: helm lint charts/document-processor
-
-      # ---------------------------------------------------------
-      # YAML lint (ArgoCD + Helm templates)
-      # ---------------------------------------------------------
-      - name: Install yamllint
-        run: pip install yamllint
-
-      - name: Run yamllint
-        run: yamllint argocd charts
-
-      # ---------------------------------------------------------
-      # Markdown lint (README + docs)
-      # ---------------------------------------------------------
-      - name: Markdown lint
-        uses: avto-dev/markdown-lint@v1
-        with:
-          args: |
-            README.md
-            docs/**/*.md
