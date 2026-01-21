@@ -84,4 +84,80 @@ $ kubectl get pods -n document-processor
 ```
 
 
-## 1. Configure the ArgoCD
+## C. Promotion process with ArgoCD
+
+ArgoCD helps on the GitOps process to maintain a good management of environemnts while it guarantees the idempotency of what is depoyed on the enviroments. 
+
+For this excersise, we are asuming that we use a trunk based branching strategy which consist on direct commits for maain and the deployment of them to the corresponding environments. 
+
+So, for that the flow is the following:
+
+- Every merge to main deploys to staging
+- When validated, you tag that exact commit
+- Production tracks the tag
+
+In practical terms, it means that:
+
+1. Every time that I merge to main, it will deploy what is in the document-processort.yaml
+2. Once I have done the multiple tests and I am ready to deploy to prod, I need to update my document-processor-production.yaml file with a tag or version.
+```bash
+spec:
+  source:
+    targetRevision: release-1.4.0
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-production.yaml
+
+```
+3. Push to main
+4. Create a tag with the same version added in the prod yaml file
+```bash
+git tag release-1.4.0
+```
+5. Push taht tag to Git
+```bash
+git push origin release-1.4.0
+```
+6. Argo will see the tag and it will deploy to prod. 
+
+## D. Rollback 
+
+Following the same aproach and taking in account that we are following trunk based strategy, the rollback is really easy.
+
+We just need to follow the next steps:
+
+1. Review what was the previous tag released. 
+2. Create a revert branch or a new one
+3. Update the prod yaml file to use the previous release. Example 
+```bash
+spec:
+  source:
+    targetRevision: release-1.3.9
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-production.yaml
+```
+4. Commit and push.
+
+Internally, ArgoCD detects the change, re-renders Helm and reconciles cluster to the old state
+
+# Architecture Decisions:
+Can be found in the architecture.md file
+
+# What You’d Improve:
+- Starting by Terraform, I would creates modules for every single AWS service separated in different repositories. This is a good practice because it helps to encapsulate one single type of resources, making them more maintainable and reusable with multiple projects. Currently setup is not reusable
+- Implementation of Checov to scan infrastructure and find misconfigurations before creating them
+- Implement Terragunt for the Terraform management such as environment, states, etc
+- Implement unitary tests with Terratest.
+- Configure a proper dev - stg - prod chart with Helm
+- Define the manifests for dev - stg - prod for ArgoCD
+- Implement GitHub Actions to decorarate the PR with check such as: Terraform Linters, Helm Linters, security checks, etc,
+
+# Time Spent
+
+- Terrafornm: 1.5 H
+- Helm: 2.5 H
+- ArgoCD: 1 H
+- Documentation: 1 H
