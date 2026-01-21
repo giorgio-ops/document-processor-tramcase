@@ -6,7 +6,7 @@ meetadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/giorgio-ops/document-processor-tramcase.git'
+    repoURL: "https://github.com/giorgio-ops/document-processor-tramcase.git"
     targetRevision: release-1.3.9
   path: charts/document-processor
   helm:
@@ -14,7 +14,7 @@ spec:
       - values.yaml
       - value-production.yaml
   destination:
-    server: 'https://kubernetes.default.svc'
+    server: "https://kubernetes.default.svc"
     namespace: document-processor-production
   syncPolicy:
     automated:
