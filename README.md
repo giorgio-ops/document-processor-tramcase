@@ -184,10 +184,6 @@ Architecture decisions are documented in the [architecture](docs/architecture.md
 - Implement infrastructure unit tests using **Terratest**
 - Define separate Helm values for `dev`, `stg`, and `prod`
 - Create dedicated Argo CD manifests per environment
-- Add GitHub Actions to decorate pull requests with:
-  - Terraform linting and validation
-  - Helm linting
-  - Security and compliance checks
 
 ---
 

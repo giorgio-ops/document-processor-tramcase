@@ -17,3 +17,7 @@ Here you can find some iof the architectural decutions
 - With respect to Argo CD, we assume that an application is already configured.
 
 - A trunk-based branching strategy has been defined and adopted.
+
+- GitHub Actions to analyze main branch and PR with:
+  - Terraform linting and validation
+  - Helm linting
