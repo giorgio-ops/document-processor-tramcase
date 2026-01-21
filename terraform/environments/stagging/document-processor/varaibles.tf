@@ -31,16 +31,3 @@ variable "log_retention_days" {
   type        = number
   description = "Number of days to retain logs"
 }
-variable "namespace" {
-  type        = string
-  description = "Kubernetes namespace where the service account is located"
-}
-
-variable "eks_cluster_arn" {
-  type        = string
-  description = "EKS Cluster ARN"
-}
-variable "eks_oidc_issuer" {
-  type        = string
-  description = "EKS OIDC Issuer URL"
-}

@@ -6,7 +6,7 @@ resource "aws_iam_role" "document_processor_role" {
       {
         Effect = "Allow",
         Principal = {
-          Federated = "${data.aws_iam_openid_connect_provider.oidc_provider_url.arn}"
+          Federated = data.aws_iam_openid_connect_provider.oidc_provider_url.arn
         },
         Action = "sts:AssumeRoleWithWebIdentity",
         Condition = {
